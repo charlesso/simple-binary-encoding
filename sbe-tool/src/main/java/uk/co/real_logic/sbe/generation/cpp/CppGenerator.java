@@ -2603,6 +2603,9 @@ public class CppGenerator implements CodeGenerator
                 throw new IllegalStateException("tokens must begin with BEGIN_GROUP: token=" + groupToken);
             }
 			
+			sb.append(indent).append("if (writer." + formatPropertyName(groupToken.name()) + "InActingVersion())\n"); /*check Acting version*/
+			sb.append(indent).append("{\n");                                                                          /*check Acting version*/
+
             if (atLeastOne[0])
             {
                 sb.append(indent).append("builder << \", \";\n");
@@ -2629,6 +2632,8 @@ public class CppGenerator implements CodeGenerator
                 formatPropertyName(groupToken.name()),
                 groupToken.name());
 				
+			sb.append(indent).append("}\n\n");                                                                         /*check Acting version*/
+
             i = findEndSignal(groups, i, Signal.END_GROUP, groupToken.name());
         }
 
@@ -3062,7 +3067,11 @@ public class CppGenerator implements CodeGenerator
             }
 
             new Formatter(sbSkip).format(
-                indent + "    %2$s().forEach([](%1$s &e){ e.skip(); });\n",
+                //indent + "    %2$s().forEach([](%1$s &e){ e.skip(); });\n",   /*check Acting version*/
+                indent + "    if (%2$sInActingVersion()) \n" +                  /*check Acting version*/
+                indent + "    {\n" +                                            /*check Acting version*/
+                indent + "        %2$s().forEach([](%1$s &e){ e.skip(); });\n" +/*check Acting version*/
+                indent + "    }\n",                                             /*check Acting version*/
                 formatClassName(groupToken.name()),
                 formatPropertyName(groupToken.name()));
 
