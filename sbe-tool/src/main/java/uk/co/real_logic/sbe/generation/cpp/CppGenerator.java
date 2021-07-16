@@ -322,9 +322,11 @@ public class CppGenerator implements CodeGenerator
             indent + "    }\n\n" +
 
             indent + "    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)\n" +
-            indent + "    std::uint64_t sbeCheckPosition(const std::uint64_t position)\n" +
+            indent + "    inline static std::uint64_t sbeCheckPosition(\n" +
+            indent + "        const std::uint64_t position,\n" +
+            indent + "        const std::uint64_t bufferLength)\n" +
             indent + "    {\n" +
-            indent + "        if (SBE_BOUNDS_CHECK_EXPECT((position > m_bufferLength), false))\n" +
+            indent + "        if (SBE_BOUNDS_CHECK_EXPECT((position > bufferLength), false))\n" +
             indent + "        {\n" +
             indent + "            throw std::runtime_error(\"buffer too short [E100]\");\n" +
             indent + "        }\n" +
@@ -333,7 +335,7 @@ public class CppGenerator implements CodeGenerator
 
             indent + "    void sbePosition(const std::uint64_t position)\n" +
             indent + "    {\n" +
-            indent + "        *m_positionPtr = sbeCheckPosition(position);\n" +
+            indent + "        *m_positionPtr = sbeCheckPosition(position, m_bufferLength);\n" +
             indent + "    }\n\n" +
 
             indent + "    SBE_NODISCARD inline std::uint64_t count() const SBE_NOEXCEPT\n" +
@@ -1910,7 +1912,7 @@ public class CppGenerator implements CodeGenerator
             "        m_buffer(buffer),\n" +
             "        m_bufferLength(bufferLength),\n" +
             "        m_offset(offset),\n" +
-            "        m_position(sbeCheckPosition(offset + actingBlockLength)),\n" +
+            "        m_position(sbeCheckPosition(offset + actingBlockLength, bufferLength)),\n" +
             "        m_actingBlockLength(actingBlockLength),\n" +
             "        m_actingVersion(actingVersion)\n" +
             "    {\n" +
@@ -2056,9 +2058,11 @@ public class CppGenerator implements CodeGenerator
             "    }\n\n" +
 
             "    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)\n" +
-            "    std::uint64_t sbeCheckPosition(const std::uint64_t position)\n" +
+            "    inline static std::uint64_t sbeCheckPosition(\n" +
+            "        const std::uint64_t position,\n" +
+            "        const std::uint64_t bufferLength)\n" +
             "    {\n" +
-            "        if (SBE_BOUNDS_CHECK_EXPECT((position > m_bufferLength), false))\n" +
+            "        if (SBE_BOUNDS_CHECK_EXPECT((position > bufferLength), false))\n" +
             "        {\n" +
             "            throw std::runtime_error(\"buffer too short [E100]\");\n" +
             "        }\n" +
@@ -2067,7 +2071,7 @@ public class CppGenerator implements CodeGenerator
 
             "    void sbePosition(const std::uint64_t position)\n" +
             "    {\n" +
-            "        m_position = sbeCheckPosition(position);\n" +
+            "        m_position = sbeCheckPosition(position, m_bufferLength);\n" +
             "    }\n\n" +
 
             "    SBE_NODISCARD std::uint64_t encodedLength() const SBE_NOEXCEPT\n" +
@@ -2598,7 +2602,7 @@ public class CppGenerator implements CodeGenerator
             {
                 throw new IllegalStateException("tokens must begin with BEGIN_GROUP: token=" + groupToken);
             }
-
+			
             if (atLeastOne[0])
             {
                 sb.append(indent).append("builder << \", \";\n");
@@ -2624,7 +2628,7 @@ public class CppGenerator implements CodeGenerator
                 formatClassName(groupToken.name()),
                 formatPropertyName(groupToken.name()),
                 groupToken.name());
-
+				
             i = findEndSignal(groups, i, Signal.END_GROUP, groupToken.name());
         }
 
