@@ -2632,7 +2632,7 @@ public class CppGenerator implements CodeGenerator
                 formatPropertyName(groupToken.name()),
                 groupToken.name());
 				
-			sb.append(indent).append("}\n\n");                                                                         /*check Acting version*/
+			sb.append(indent).append("}\n\n");                                                                         /*check Acting version*/ 
 
             i = findEndSignal(groups, i, Signal.END_GROUP, groupToken.name());
         }
@@ -2644,6 +2644,9 @@ public class CppGenerator implements CodeGenerator
             {
                 throw new IllegalStateException("tokens must begin with BEGIN_VAR_DATA: token=" + varDataToken);
             }
+			
+            sb.append(indent).append("if (writer." + formatPropertyName(varDataToken.name()) + "InActingVersion())\n"); /*check Acting version*/
+            sb.append(indent).append("{\n");                                                                            /*check Acting version*/
 
             if (atLeastOne[0])
             {
@@ -2669,6 +2672,8 @@ public class CppGenerator implements CodeGenerator
                 sb.append(indent).append("builder << '\"' <<\n").append(indent).append(INDENT)
                     .append(getAsStringFunction).append(" << '\"';\n\n");
             }
+
+            sb.append(indent).append("}\n\n");                                                                         /*check Acting version*/ 
 
             i += varDataToken.componentTokenCount();
         }
@@ -3100,8 +3105,14 @@ public class CppGenerator implements CodeGenerator
                 lengthToken.encoding().applicableMaxValue().longValue());
 
             new Formatter(sbSkip).format(
-                indent + "    skip%1$s();\n",
-                toUpperFirstChar(varDataToken.name()));
+                //indent + "    skip%1$s();\n",                                 /*check Acting version*/
+                indent + "    if (%2$sInActingVersion()) \n" +                  /*check Acting version*/
+                indent + "    {\n" +                                            /*check Acting version*/
+                indent + "        skip%1$s();\n" +                             /*check Acting version*/
+                indent + "    }\n", 
+                //toUpperFirstChar(varDataToken.name()));                       /*check Acting version*/
+                toUpperFirstChar(varDataToken.name()),                          /*check Acting version*/
+                formatPropertyName(varDataToken.name()));                       /*check Acting version*/
 
             i += varDataToken.componentTokenCount();
         }
